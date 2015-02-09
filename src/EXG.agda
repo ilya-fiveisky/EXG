@@ -4,6 +4,7 @@ open import Data.String
 open import Data.Unit
 open import IO
 import IO.Primitive as Prim
+import Network.Primitive as NetPrim
 
 main : Prim.IO ⊤
-main = Prim.return tt
+main = NetPrim.withSocketsDo (Prim.return tt)
