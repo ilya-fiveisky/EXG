@@ -7,4 +7,5 @@ import IO.Primitive as Prim
 import Network.Primitive as NetPrim
 
 main : Prim.IO ⊤
-main = NetPrim.withSocketsDo (Prim.return tt)
+main = NetPrim.withSocketsDo
+  (NetPrim.bracket (Prim.return tt) (λ _ →  Prim.return tt) (λ _ →  Prim.return tt))
