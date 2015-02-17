@@ -4,9 +4,8 @@ open import Data.String
 open import Data.Unit
 open import IO
 import IO.Primitive as Prim
-import Network.Primitive as NetPrim
-import Control.Exception.Primitive as ExPrim
+open import Network
+open import Control.Exception
 
 main : Prim.IO ⊤
-main = NetPrim.withSocketsDo
-  (ExPrim.bracket (Prim.return tt) (λ _ →  Prim.return tt) (λ _ →  Prim.return tt))
+main = run (withSocketsDo (bracket (return tt) (λ _ →  return tt) (λ _ →  return tt)))
