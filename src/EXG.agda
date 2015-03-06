@@ -13,4 +13,4 @@ import Network.Primitive as NetPrim
 open import Control.Exception
 
 main : Prim.IO ⊤
-main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 0))) (λ _ →  return tt) (λ _ →  return tt)
+main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → hPutStrLn h "display")
