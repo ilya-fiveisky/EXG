@@ -28,5 +28,8 @@ isResponseOk h = ♯ (hGetLine h) >>= λ r →
     responseToString : Costring → String
     responseToString r = fromList (BVI.toList (take maxResponseLength r))
 
+send : Prim.Handle → String → IO ⊤
+send h command = hPutStrLn h command
+
 main : Prim.IO ⊤
 main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → hPutStrLn h "display")
