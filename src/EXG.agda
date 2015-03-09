@@ -19,9 +19,9 @@ import Network.Primitive as NetPrim
 open import Control.Exception
 
 isResponseOk : Prim.Handle → IO (String ⊎ ⊤)
-isResponseOk h = ♯ (hGetLine h) >>= λ r → 
-  ♯ (let response = responseToString r in 
-    if response == okStr then return (inj₂ tt) else return (inj₁ response))
+isResponseOk h = ♯ hGetLine h >>= λ r → 
+  ♯ let response = responseToString r in 
+        if response == okStr then return (inj₂ tt) else return (inj₁ response)
   where
     okStr = "200 OK\r"
     maxResponseLength = length (toList okStr)
@@ -30,6 +30,18 @@ isResponseOk h = ♯ (hGetLine h) >>= λ r →
 
 send : Prim.Handle → String → IO ⊤
 send h command = hPutStrLn h command
+
+setupConnection : Prim.Handle → IO (String ⊎ ⊤)
+setupConnection h =
+  ♯ hSetBuffering h Prim.LineBuffering >> ♯ (
+  ♯ send h "display" >> ♯ (
+  ♯ isResponseOk h >>= λ {
+    (inj₂ _) → ♯ (
+      ♯ send h "watch" >> ♯ (
+      ♯ isResponseOk h >>= λ {
+        (inj₂ _) → ♯ return (inj₂ tt);
+        (inj₁ watchResponse) → ♯ return (inj₁ watchResponse)}));
+    (inj₁ displayResponse) → ♯ return (inj₁ displayResponse)}))
 
 main : Prim.IO ⊤
 main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → hPutStrLn h "display")
