@@ -1,4 +1,4 @@
-module EXG where
+module Main where
 
 open import Coinduction
 open import Data.Bool
