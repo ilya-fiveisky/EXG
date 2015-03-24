@@ -1,10 +1,11 @@
 module Main where
 
 open import Coinduction
+open import Category.Monad
 open import Data.Bool
 import Data.BoundedVec.Inefficient as BVI
 open import Data.Colist using (take)
-open import Data.Fin hiding (_<_)
+open import Data.Fin hiding (_<_; lift)
 open import Data.List using (length)
 open import Data.Nat
 open import Data.String
@@ -17,6 +18,9 @@ import IO.Primitive as Prim
 open import Network
 import Network.Primitive as NetPrim
 open import Control.Exception
+
+open import EXG.Signal.Processor ( record { return = Prim.return; _>>=_ = Prim._>>=_ } )
+
 
 isResponseOk : Prim.Handle → IO (String ⊎ ⊤)
 isResponseOk h = ♯ hGetLine h >>= λ r → 
@@ -44,4 +48,8 @@ setupConnection h =
     (inj₁ displayResponse) → ♯ return (inj₁ displayResponse)}))
 
 main : Prim.IO ⊤
-main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → hPutStrLn h "display")
+main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → 
+  ♯ setupConnection h >>= λ {
+    (inj₁ error) → ♯ putStrLn error;
+    (inj₂ _) → ♯ lift (startProcess (run (hGetLine h))) }
+  )
