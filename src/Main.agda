@@ -51,5 +51,5 @@ main : Prim.IO ⊤
 main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → 
   ♯ setupConnection h >>= λ {
     (inj₁ error) → ♯ putStrLn error;
-    (inj₂ _) → ♯ lift (startProcess (run (hGetLine h))) }
+    (inj₂ _) → ♯ lift (startProcess (run (hGetLine h)) (λ s → run (putStrLn s))) }
   )
