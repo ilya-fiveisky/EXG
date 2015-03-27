@@ -28,7 +28,7 @@ isResponseOk h = ♯ hGetLine h >>= λ r →
         if response == okStr then return (inj₂ tt) else return (inj₁ response)
   where
     okStr = "200 OK\r"
-    maxResponseLength = length (toList okStr)
+    maxResponseLength = 100 --length (toList okStr)
     responseToString : Costring → String
     responseToString r = fromList (BVI.toList (take maxResponseLength r))
 
