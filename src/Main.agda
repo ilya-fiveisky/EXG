@@ -21,8 +21,8 @@ open import Control.Exception
 
 open import EXG.AppConfig
 open import EXG.Signal.Processor 
-  {MonadSignature = record {return = Prim.return; _>>=_ = Prim._>>=_}}
-  {ConfigSignature = record {sampling-rate = AppConfig.sampling-rate; step-count = AppConfig.step-count}}
+  {MonadInterpretation = record {return = Prim.return; _>>=_ = Prim._>>=_}}
+  {ConfigInterpretation = record {sampling-rate = AppConfig.sampling-rate; step-count = AppConfig.step-count}}
 
 
 isResponseOk : Prim.Handle → IO (String ⊎ ⊤)
