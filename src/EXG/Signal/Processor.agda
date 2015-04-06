@@ -1,4 +1,5 @@
 open import Category.Monad
+open import Category.Monad.State
 open import EXG.Signal.Processor.Config
 
 module EXG.Signal.Processor 
@@ -9,21 +10,31 @@ import      Data.BoundedVec.Inefficient as BVI
 open import Data.Colist hiding (fromList)
 open import Data.List hiding (take)
 open import Data.Nat
+open import Data.Product
 open import Data.String
 open import Data.Unit
 open import Function
-open        RawMonad MonadInterpretation
+open        RawMonad MonadInterpretation using () renaming (_>>=_ to _>>='_; return to return'; _>>_ to _>>'_)
 open        Config ConfigInterpretation
 
 
-process : (config : C) → (recursion-counter : ℕ) → (input : M Costring) → (logger : String → M ⊤) → M ⊤
-process c zero _ _ = return tt
-process c (suc n) input logger = 
-  replicateM MonadInterpretation (sampling-rate c) input >>= 
---  λ xs → return tt >> 
---  process c n input logger
-    λ {(head ∷ _) → (logger $ fromList $ BVI.toList $ take 1000 head) >> process c n input logger;
-    []       → return tt}
+instance MI = MonadInterpretation
+
+process : (config : C) → (recursion-counter : ℕ) → (input : M Costring) → (logger : String → M ⊤) → StateT ℕ M ⊤
+process c zero _ logger = lift (logger "zero")
+  where open RawMonad (StateTMonad ℕ MonadInterpretation)
+process c (suc n) input logger =
+  lift
+  (
+      replicateM MonadInterpretation (sampling-rate c) input >>='
+    --  λ _ → return tt >> 
+    --  process c n input logger
+      λ {(head ∷ _) → logger $ fromList $ BVI.toList $ take 1000 head;
+      []       → return' tt}
+  )
+  >>
+  process c n input logger
+  where open RawMonad (StateTMonad ℕ MonadInterpretation)
 
 startProcess : C → M Costring → (String → M ⊤) → M ⊤
-startProcess c input logger = process c (step-count c) input logger
+startProcess c input logger = logger "start" >>' process c (step-count c) input logger 0 >>=' λ {(x , _) → return' x}
