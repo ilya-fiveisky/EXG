@@ -37,4 +37,4 @@ process c (suc n) input logger =
   where open RawMonad (StateTMonad ℕ MonadInterpretation)
 
 startProcess : C → M Costring → (String → M ⊤) → M ⊤
-startProcess c input logger = logger "start" >>' process c (step-count c) input logger 0 >>=' λ {(x , _) → return' x}
+startProcess c input logger = logger "start" >>' evalStateT (process c (step-count c) input logger) 0
