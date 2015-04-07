@@ -56,8 +56,12 @@ app-config = record {
   step-count = 5}
 
 main : Prim.IO ⊤
-main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose (λ h → 
-  ♯ setupConnection h >>= λ {
-    (inj₁ error) → ♯ putStrLn error;
-    (inj₂ _) → ♯ lift (startProcess app-config (run (hGetLine h)) (λ s → run (putStrLn s))) }
+main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 0) ∷ (# 1) ∷ [])) (portNum (# 8336))) hClose
+  (λ h → 
+      ♯ setupConnection h
+      >>= λ
+      {
+        (inj₁ error) → ♯ putStrLn error;
+        (inj₂ _) → ♯ lift (startProcess app-config (run (hGetLine h)) (λ s → run (putStrLn s)))
+      }
   )
