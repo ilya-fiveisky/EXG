@@ -22,7 +22,14 @@ open import Control.Exception
 open import EXG.AppConfig
 open import EXG.Signal.Processor 
   {MonadInterpretation = record {return = Prim.return; _>>=_ = Prim._>>=_}}
-  {ConfigInterpretation = record {sampling-rate = AppConfig.sampling-rate; step-count = AppConfig.step-count}}
+  {ConfigInterpretation = 
+    record 
+    {
+      channel-count = AppConfig.channel-count;
+      sampling-rate = AppConfig.sampling-rate;
+      step-count = AppConfig.step-count
+    }
+  }
 
 
 isResponseOk : Prim.Handle → IO (String ⊎ ⊤)
@@ -52,6 +59,7 @@ setupConnection h =
 
 app-config : AppConfig
 app-config = record {
+  channel-count = 2;
   sampling-rate = 256;
   step-count = 5}
 
