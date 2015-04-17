@@ -60,6 +60,7 @@ setupConnection h =
 app-config : AppConfig
 app-config = record {
   channel-count = 2;
+  sample-string-max-length = 1000;
   sampling-rate = 256;
   step-count = 5}
 
@@ -70,6 +71,6 @@ main = run $ withSocketsDo $ bracket (connectTo (IPv4 ((# 127) ∷ (# 0) ∷ (# 
       >>= λ
       {
         (inj₁ error) → ♯ putStrLn error;
-        (inj₂ _) → ♯ lift (startProcess app-config (run (hGetLine h)) (λ s → run (putStrLn s)))
+        (inj₂ _) → ♯ lift (startProcess app-config (run (hGetLine h)) (run ∘ putStrLn))
       }
   )
