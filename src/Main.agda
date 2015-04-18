@@ -26,11 +26,12 @@ open import EXG.Signal.Processor
     record 
     {
       channel-count = AppConfig.channel-count;
+      sample-history-length = AppConfig.sample-history-length;
+      sample-string-max-length = AppConfig.sample-string-max-length;
       sampling-rate = AppConfig.sampling-rate;
       step-count = AppConfig.step-count
     }
   }
-
 
 isResponseOk : Prim.Handle → IO (String ⊎ ⊤)
 isResponseOk h = ♯ hGetLine h >>= λ r → 
@@ -60,6 +61,7 @@ setupConnection h =
 app-config : AppConfig
 app-config = record {
   channel-count = 2;
+  sample-history-length = 256;
   sample-string-max-length = 1000;
   sampling-rate = 256;
   step-count = 5}

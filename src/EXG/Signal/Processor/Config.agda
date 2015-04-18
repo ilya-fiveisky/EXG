@@ -6,6 +6,7 @@ open import Level
 record Config {l} (A : Set l) : Set l where
   field
     channel-count : A → ℕ
+    sample-history-length : A → ℕ
     sample-string-max-length : A → ℕ
     sampling-rate : A → ℕ
     step-count : A → ℕ
