@@ -1,8 +1,22 @@
 module EXG.Signal.Processor.State where
 
-open import Data.Nat
+open import Data.Nat using (ℕ)
 open import EXG.Signal
+open import Level
 
-record State {l} (A : Set l) : Set l where
+record State {l l'} {channel-count : ℕ} (A : Set l) (B : Set l') : Set (l ⊔ l') where
   field
-    signal-history : ∀ {n} → A → Signal A n
+    signal-history : A → Signal B channel-count
+    _→signal-history_ : Signal B channel-count → A → A
+
+record StateData {l} {n : ℕ} (B : Set l) : Set l where
+  field
+    signal-history : Signal B n
+
+stateImpl : ∀ {l} {n : ℕ} {B : Set l} → State {_} {_} {n} (StateData B) B
+stateImpl = 
+    record
+    {
+      signal-history = λ sd → StateData.signal-history sd;
+      _→signal-history_ = λ signal sd → record sd {signal-history = signal}
+    }

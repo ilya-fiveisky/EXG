@@ -4,48 +4,75 @@ open import EXG.Signal.Processor.Config
 
 module EXG.Signal.Processor 
   {M : Set → Set}{MonadInterpretation : RawMonad M}
-  {C : Set}{ConfigInterpretation : Config C} where
+  {C : Set}{ConfigInterpretation : Config C}
+  where
 
+open import Data.BoundedLIFO using (empty)
 import      Data.BoundedVec.Inefficient as BVI
-open import Data.Colist hiding (fromList)
-open import Data.List hiding (take)
+open import Data.Colist hiding (fromList; replicate)
+open import Data.List hiding (replicate; take)
 open import Data.Nat
 open import Data.Nat.Show
 open import Data.Product
 open import Data.String hiding (show)
+open import Data.Vec using (replicate)
 open import Data.Unit
+import      EXG.Signal.Parser
+  {M} {MonadInterpretation}
+  {C} {ConfigInterpretation}
+  as SP
+import      EXG.Signal.Processor.State as PS
 open import Function
 open        Config ConfigInterpretation
 
 instance MI = MonadInterpretation
 
-process : (config : C) → (recursion-counter : ℕ) → (input : M Costring) → (logger : String → M ⊤) → StateT ℕ M ⊤
+process : ∀ {A} → 
+  (config : C) →
+  {SI : PS.State {channel-count = channel-count config} A ℕ} →
+  (recursion-counter : ℕ) →
+  (input : M Costring) →
+  (logger : String → M ⊤) →
+  StateT A M ⊤
 process c zero _ logger = lift (logger "zero")
-process c (suc n) input logger =
+process {A = A} c {SI = SI} (suc n) input logger =
   get 
   >>= λ s →
-  lift
-  (
-     logger (show s)
-     >>'
-     replicateM MI (sampling-rate c) input
-     >>=' λ
-     {
-       (head ∷ _) → logger $ fromList $ BVI.toList $ take 1000 head;
-       []         → return' tt
-     }
-  )
+  lift (SP.parse c input logger)
+  >>= λ signal → 
+  put (signal →signal-history s)
   >>
-  put (s + 1)
-  >>
-  process c n input logger
+  process c {SI} n input logger
   where
-  open RawMonadState (StateTMonadState ℕ MI)
-  open RawMonad MI using () renaming (_>>=_ to _>>='_; return to return'; _>>_ to _>>'_)
+  open PS.State SI
+  open RawMonadState (StateTMonadState A MI)
 
 startProcess : C → M Costring → (String → M ⊤) → M ⊤
 startProcess c input logger =
   logger "start"
   >>
-  evalStateT (process c (step-count c) input logger) 0
-  where open RawMonad MI
+  evalStateT
+    (
+    process
+      c
+      {PS.stateImpl}
+      (step-count c)
+      input
+      logger
+    )
+    record
+    {
+      signal-history =
+        record
+        {
+          channels = replicate
+            record
+            {
+              memory-length = 0;
+              values = empty 0
+            }
+        }
+    }
+  where
+  open RawMonad MI
+
