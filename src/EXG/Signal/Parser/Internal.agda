@@ -3,6 +3,7 @@ module EXG.Signal.Parser.Internal where
 open import Data.BoundedLIFO
 open import Data.List using (List; []; _∷_; map; mapM; replicateM)
 open import Data.Nat
+open import Data.Sum
 open import Data.Vec using (Vec; fromList; toList; transpose) renaming (map to vmap)
 open import EXG.Signal
 open import EXG.Signal.Channel
@@ -23,3 +24,15 @@ convert-samples-to-signal hl ss =
         }
       ) ∘ transpose ∘ vmap Sample.values) ss
   }
+
+filter-inj₁ : ∀ {l} {A B : Set l} → List (A ⊎ B) → List A
+filter-inj₁ [] = []
+filter-inj₁ (x ∷ xs) with x
+... | (inj₁ y) = y ∷ filter-inj₁ xs
+... | (inj₂ _) = filter-inj₁ xs
+
+filter-inj₂ : ∀ {l} {A B : Set l} → List (A ⊎ B) → List B
+filter-inj₂ [] = []
+filter-inj₂ (x ∷ xs) with x
+... | (inj₁ _) = filter-inj₂ xs
+... | (inj₂ y) = y ∷ filter-inj₂ xs
