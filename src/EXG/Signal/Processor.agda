@@ -65,12 +65,7 @@ startProcess c input logger =
       signal-history =
         record
         {
-          channels = replicate
-            record
-            {
-              memory-length = 0;
-              values = empty 0
-            }
+          channels = replicate record {values = empty 0}
         }
     }
   where

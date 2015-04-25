@@ -17,6 +17,10 @@ stateImpl : ∀ {l} {n : ℕ} {B : Set l} → State {_} {_} {n} (StateData B) B
 stateImpl = 
     record
     {
-      signal-history = λ sd → StateData.signal-history sd;
-      _→signal-history_ = λ signal sd → record sd {signal-history = signal}
+      signal-history = StateData.signal-history;
+      _→signal-history_ = λ signal sd →
+        record sd
+        {
+          signal-history = put signal into (StateData.signal-history sd)
+        }
     }

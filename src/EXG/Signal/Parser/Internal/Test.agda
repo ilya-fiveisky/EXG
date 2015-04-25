@@ -21,19 +21,19 @@ test₁ = refl
 test₂ :
   convert-samples-to-signal 0 (record {number = 0; values = [ 0 ]} ∷ [])
   ≡
-  record {channels = [ record {memory-length = 0; values = empty 0} ]}
+  record {channels = [ record {values = empty 0} ]}
 test₂ = refl
 
 test₃ : 
   convert-samples-to-signal 1 (record {number = 0; values = [ 2 ]} ∷ [])
   ≡
-  record {channels = [ record {memory-length = 1; values = put l[ 2 ] (empty 1)} ]}
+  record {channels = [ record {values = put l[ 2 ] (empty 1)} ]}
 test₃ = refl
 
 test₄ : 
   convert-samples-to-signal 1 (record {number = 0; values = 2 ∷ 3 ∷ []} ∷ [])
   ≡
   record {channels =
-    (record {memory-length = 1; values = put l[ 2 ] (empty 1)}) ∷
-    (record {memory-length = 1; values = put l[ 3 ] (empty 1)})  ∷ [] }
+    (record {values = put l[ 2 ] (empty 1)}) ∷
+    (record {values = put l[ 3 ] (empty 1)})  ∷ [] }
 test₄ = refl

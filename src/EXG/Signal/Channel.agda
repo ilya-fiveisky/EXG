@@ -6,5 +6,5 @@ open import Data.Nat
 
 record Channel {l} (A : Set l) : Set l where
   field
-    memory-length : ℕ
+    {memory-length} : ℕ
     values : BoundedLIFO A memory-length
